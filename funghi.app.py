@@ -6,158 +6,121 @@ import pandas as pd
 import datetime
 
 # --- 1. Konfiguracja strony ---
-st.set_page_config(
-    page_title="Fungi Atelier | Grzyby Premium",
-    page_icon="🍄",
-    layout="centered"
-)
+st.set_page_config(page_title="Fungi Atelier | Grzyby Premium", page_icon="🍄", layout="centered")
 
-# Inicjalizacja "bazy danych" w pamięci sesji (dla symulacji zamówień w panelu admina)
+# --- 2. MAGIA CSS (Stylizacja Premium) ---
+st.markdown("""
+<style>
+    /* Ukrycie domyślnego menu i stopki Streamlit */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
+    /* Zmiana wyglądu głównego przycisku (Złoto/Zieleń) */
+    div.stButton > button:first-child {
+        background-color: #2E402B; /* Elegancka, głęboka zieleń */
+        color: #F5F5F5;
+        border: 1px solid #2E402B;
+        border-radius: 5px;
+        padding: 10px 24px;
+        font-weight: bold;
+        width: 100%;
+        transition: all 0.3s ease-in-out;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #1A2618;
+        border: 1px solid #D4AF37; /* Złota ramka po najechaniu */
+        color: #D4AF37;
+    }
+    
+    /* Delikatne tło pod sekcjami */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Inicjalizacja bazy zamówień dla admina
 if 'zamowienia' not in st.session_state:
     st.session_state.zamowienia = []
 
-# --- 2. UKRYTY PANEL ADMINISTRATORA ---
+# --- 3. UKRYTY PANEL ADMINISTRATORA ---
 st.sidebar.markdown("🔒 **Strefa Fungi Atelier**")
 haslo_admin = st.sidebar.text_input("Hasło dostępu", type="password")
 
-# Jeśli wpisano poprawne hasło, pokazujemy tylko panel admina i zatrzymujemy resztę aplikacji
-if haslo_admin == "Farma2026":  # W produkcji to hasło powinno być w st.secrets!
-    st.title("🛠️ Panel Zarządzania Zamówieniami")
-    st.write("Witaj w panelu sterowania Fungi Atelier. Poniżej znajduje się lista rezerwacji z obecnej sesji.")
-    
+if haslo_admin == "Farma2026":
+    st.title("🛠️ Panel Zarządzania")
     if len(st.session_state.zamowienia) > 0:
-        # Konwersja listy słowników na ładną tabelę (DataFrame)
         df = pd.DataFrame(st.session_state.zamowienia)
         st.dataframe(df, use_container_width=True)
-        
-        # Opcja pobrania zamówień do Excela/CSV
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Pobierz bazę jako plik CSV", data=csv, file_name="zamowienia_grzyby.csv", mime="text/csv")
     else:
         st.info("Brak nowych zamówień w tej sesji.")
-        
-    st.stop() # Ta komenda ukrywa resztę strony dla klientów, jeśli jesteś zalogowany jako admin!
+    st.stop()
 
 
-# --- 3. GŁÓWNA STRONA DLA KLIENTÓW ---
+# --- 4. GŁÓWNA STRONA DLA KLIENTÓW (PREMIUM) ---
 
-# Pasek FOMO (Fear Of Missing Out)
-st.error("🔥 **Ostatnie sztuki!** Na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki Jeżowatej**. Rezerwacje zamykamy w środę o 20:00!")
+# Pasek FOMO
+st.error("🔥 **Ostatnie sztuki!** Na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki Jeżowatej**.")
+
+# Hero Image (Zdjęcie Główne z bazy Unsplash - potem podmienisz na swoje)
+st.image("https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=1200&auto=format&fit=crop", use_column_width=True)
 
 # Nagłówek
-st.title("🍄 Fungi Atelier - Grzyby Premium")
-st.markdown("### Świeże, rzemieślnicze grzyby egzotyczne ze Starogardu Gdańskiego.")
-st.write("Nie sprzedajemy grzybów, które leżały tydzień w chłodni. Działamy w modelu **Pre-order** – ścinamy towar dokładnie wtedy, gdy złożysz zamówienie. Prosto z naszego mikroklimatu do Twojej kuchni.")
+st.markdown("<h1 style='text-align: center;'>Fungi Atelier</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: gray;'>Rzemieślnicza uprawa grzybów egzotycznych</h4>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Ścinane na zamówienie. Dostarczane tego samego dnia w Starogardzie Gdańskim.</p>", unsafe_allow_html=True)
 
 st.divider()
 
-# Sekcja Oferty
-st.header("🌿 Nasze Zbiory")
-col1, col2 = st.columns(2)
+# Eleganckie zakładki zamiast zwykłego tekstu
+tab1, tab2 = st.tabs(["🌿 Nasze Zbiory", "🧠 Dlaczego my?"])
 
-with col1:
-    st.subheader("🪵 Shiitake")
-    st.write("Twardy, mięsisty kapelusz, potężna dawka umami. Idealny do ramenu, na masło lub do woka.")
-    st.markdown("**Cena:** 40 zł / 1 kg")
+with tab1:
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("https://images.unsplash.com/photo-1633475027503-45a8df2410a6?q=80&w=600&auto=format&fit=crop", caption="Shiitake (Twardnik Japoński)")
+        st.markdown("**Cena:** 40 zł / 1 kg")
+        st.write("Mięsisty kapelusz, potężna dawka umami. Król azjatyckiej kuchni.")
+    with col2:
+        st.image("https://images.unsplash.com/photo-1605807646983-377bc5a76445?q=80&w=600&auto=format&fit=crop", caption="Soplówka (Lion's Mane)")
+        st.markdown("**Cena:** 60 zł / 1 kg")
+        st.write("Kulinarny rarytas przypominający mięso kraba. Ultra-świeża.")
 
-with col2:
-    st.subheader("☁️ Soplówka Jeżowata")
-    st.write("Kulinarny rarytas przypominający mięso kraba. Naturalny nootropik (wspiera pracę mózgu).")
-    st.markdown("**Cena:** 60 zł / 1 kg")
-
-st.divider()
-
-# --- 4. SEKCJA EDUKACYJNA (FAQ) ---
-st.header("🧠 Często Zadawane Pytania")
-
-with st.expander("Jak długo grzyby wytrzymają w lodówce?"):
-    st.write("Dostarczamy grzyby w ciągu kilku godzin od ścięcia z kostki. Zapakowane w oddychającą, papierową torbę, w domowej lodówce zachowają idealną jędrność i aromat przez **7 do 10 dni**.")
-
-with st.expander("Dlaczego wasze grzyby są inne niż te z marketu?"):
-    st.write("Przemysłowe grzyby często podróżują setki kilometrów zamknięte w duszącym plastiku, przez co tracą teksturę i 'pocą się'. My ścinamy je specjalnie dla Ciebie, z gwarancją zachowania ciągłego łańcucha chłodniczego.")
-
-with st.expander("Jak najlepiej przyrządzić Soplówkę? (Kulinarny tip)"):
-    st.write("Potraktuj ją jak owoce morza! Pokrój kule w grube na 1,5 cm plastry. Wrzuć na suchą patelnię, żeby odparować trochę wody, a następnie dodaj solidną łyżkę masła, ząbek czosnku i smaż na złoty kolor z obu stron. Na koniec oprósz solą. Proste i genialne.")
+with tab2:
+    st.write("Przemysłowe grzyby często podróżują setki kilometrów zamknięte w duszącym plastiku, przez co tracą teksturę i 'pocą się'. My uprawiamy je w zautomatyzowanym mikroklimacie i ścinamy dopiero, gdy złożysz zamówienie. Otrzymujesz produkt najwyższej możliwej jakości, pachnący lasem.")
 
 st.divider()
 
 # --- 5. FORMULARZ ZAMÓWIEŃ ---
-st.header("📦 Zapisz się na najbliższy zbiór!")
-st.write("Wypełnij formularz. Odezwiemy się do Ciebie z informacją o dokładnym terminie odbioru (zazwyczaj czwartek/piątek).")
+st.markdown("### 📦 Złóż rezerwację (bez zobowiązań)")
 
 with st.form("preorder_form"):
-    klient_typ = st.radio("Jesteś klientem indywidualnym czy reprezentujesz restaurację?", ["Osoba prywatna", "Restauracja / Szef Kuchni"])
-    
-    imie = st.text_input("Imię i Nazwisko / Nazwa Lokalu *")
-    telefon = st.text_input("Numer telefonu *")
-    
-    produkt = st.selectbox("Co chcesz zarezerwować?", [
-        "Zestaw Degustacyjny MIX (Shiitake + Soplówka) - 500g",
-        "Tylko Shiitake - 500g",
-        "Tylko Shiitake - 1 kg",
-        "Tylko Soplówka - 500g",
-        "Zamówienie Hurtowe (ustalimy przez telefon)"
-    ])
+    col_a, col_b = st.columns(2)
+    with col_a:
+        imie = st.text_input("Imię i Nazwisko / Nazwa Lokalu *")
+        klient_typ = st.selectbox("Typ klienta", ["Osoba prywatna", "Restauracja"])
+    with col_b:
+        telefon = st.text_input("Numer telefonu *")
+        produkt = st.selectbox("Wybierz zestaw", [
+            "Zestaw MIX (Shiitake + Soplówka) - 500g",
+            "Tylko Shiitake - 1 kg",
+            "Tylko Soplówka - 500g",
+            "Hurt B2B (kontakt telefoniczny)"
+        ])
     
     uwagi = st.text_area("Dodatkowe uwagi (np. preferowane godziny odbioru)")
     
-    submit_button = st.form_submit_button("Złóż rezerwację (bez zobowiązań)")
+    submit_button = st.form_submit_button("ZAREZERWUJ ŚWIEŻE GRZYBY")
 
     if submit_button:
         if imie and telefon:
-            # 1. Zapis do wewnętrznej bazy danych (Dla panelu admina)
-            st.session_state.zamowienia.append({
-                "Data": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
-                "Klient": imie,
-                "Telefon": telefon,
-                "Typ": klient_typ,
-                "Produkt": produkt,
-                "Uwagi": uwagi
-            })
-            
-            # 2. Mechanizm wysyłania e-maila
-            try:
-                # W wersji lokalnej możesz wpisać hasło w st.secrets.
-                # Jeśli jeszcze tego nie masz, aplikacja po prostu zapisze to w panelu i pokaże błąd maila.
-                if "EMAIL_SENDER" in st.secrets:
-                    nadawca_email = st.secrets["EMAIL_SENDER"]
-                    haslo_email = st.secrets["EMAIL_PASSWORD"]
-                    odbiorca_email = "fungi.atelier@proton.me"
-
-                    msg = MIMEMultipart()
-                    msg['From'] = nadawca_email
-                    msg['To'] = odbiorca_email
-                    msg['Subject'] = f"🍄 NOWE ZAMÓWIENIE: {imie} ({produkt})"
-
-                    tresc = f"""
-                    Nowe zamówienie z Fungi Atelier!
-                    
-                    Data: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}
-                    Typ klienta: {klient_typ}
-                    Imię/Nazwa: {imie}
-                    Telefon: {telefon}
-                    Zamówienie: {produkt}
-                    Uwagi: {uwagi if uwagi else 'Brak'}
-                    """
-                    msg.attach(MIMEText(tresc, 'plain'))
-
-                    server = smtplib.SMTP('smtp.gmail.com', 587)
-                    server.starttls()
-                    server.login(nadawca_email, haslo_email)
-                    server.send_message(msg)
-                    server.quit()
-
-                st.success(f"Dziękujemy, {imie}! Twoja rezerwacja została przyjęta. Zadzwonimy na numer {telefon}!")
-                st.balloons()
-                
-            except Exception as e:
-                # Nawet jak mail nie wyjdzie (brak konfiguracji), to zapisze się w panelu admina!
-                st.warning("Rezerwacja zapisana w systemie! (Uwaga: powiadomienie e-mail nie zostało skonfigurowane).")
+            st.session_state.zamowienia.append({"Data": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "Klient": imie, "Telefon": telefon, "Produkt": produkt})
+            st.success(f"Dziękujemy, {imie}! Rezerwacja przyjęta. Oddzwonimy na numer {telefon}.")
+            st.balloons()
         else:
-            st.error("Proszę wypełnić pola oznaczone gwiazdką (Imię i Telefon).")
+            st.error("Proszę wypełnić Imię i Telefon.")
 
 # --- 6. STOPKA ---
-st.divider()
-st.markdown("### Kontakt z Fungi Atelier")
-st.markdown("✉️ **E-mail:** fungi.atelier@proton.me")
-st.markdown("📞 **Telefon:** +48 513-783-403")
+st.markdown("<br><p style='text-align: center; color: gray; font-size: 12px;'>✉️ fungi.atelier@proton.me | 📞 +48 513-783-403</p>", unsafe_allow_html=True)
