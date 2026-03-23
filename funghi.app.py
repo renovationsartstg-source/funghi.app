@@ -54,8 +54,7 @@ st.markdown("""
 if 'zamowienia' not in st.session_state:
     st.session_state.zamowienia = []
 
-# --- 4. "PANEL DUCH" (Tylko dla Szefa) ---
-# Sprawdza, czy w adresie URL dopisano tajny parametr: ?admin=Farma2026
+# --- 4. "PANEL DUCH" (Tylko dla Szefa: /?admin=Farma2026) ---
 if st.query_params.get("admin") == "Farma2026":
     st.title("🛠️ Fungi Atelier - Centrum Dowodzenia")
     st.success("Zalogowano pomyślnie jako Administrator.")
@@ -67,15 +66,13 @@ if st.query_params.get("admin") == "Farma2026":
         st.download_button("📥 Pobierz listę rezerwacji (CSV)", data=csv, file_name="zamowienia_grzyby.csv", mime="text/csv")
     else:
         st.info("Brak nowych zamówień w tej sesji.")
-    st.stop() # Zatrzymuje ładowanie reszty strony (klient tego nie zobaczy)
-
+    st.stop() 
 
 # --- 5. STRONA GŁÓWNA (DLA KLIENTA) ---
 
 # Powiadomienie o niskim stanie magazynowym
 st.error("🔥 **Ostatnie sztuki!** Ze względu na rzemieślniczy proces, na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki**.")
 
-# Hero Image (Lokalny plik - upewnij się, że jest na GitHubie!)
 try:
     st.image("image_hero.png", use_column_width=True)
 except:
@@ -88,7 +85,7 @@ st.markdown("<p style='text-align: center; font-size: 14px;'>Ścinane pod konkre
 
 st.divider()
 
-# Sekcja Produktów (Zakładki)
+# Sekcja Produktów
 tab1, tab2 = st.tabs(["🌿 Oferta (Pre-order)", "🧠 Nasza Filozofia"])
 
 with tab1:
@@ -124,33 +121,36 @@ with st.form("preorder_form", clear_on_submit=True):
     with col_a:
         imie = st.text_input("Imię i Nazwisko / Nazwa Lokalu *")
         telefon = st.text_input("Numer telefonu *")
-    with col_b:
         klient_typ = st.selectbox("Typ klienta", ["Osoba prywatna", "Restauracja / Szef Kuchni"])
-        produkt = st.selectbox("Wybierz wsad", [
+    with col_b:
+        # --- ROZBUDOWANA LISTA WSADÓW ---
+        produkt = st.selectbox("Wybierz wsad (Produkt)", [
             "Zestaw MIX Degustacyjny (Shiitake + Soplówka) - 500g",
-            "Tylko Shiitake - 1 kg",
-            "Tylko Shiitake - 500g",
-            "Tylko Soplówka - 500g",
-            "Współpraca Hurtowa (Kontakt B2B)"
+            "Zestaw MIX Kulinarny (Shiitake + Soplówka) - 1 kg",
+            "Tylko Shiitake Premium - 500g",
+            "Tylko Shiitake Premium - 1 kg",
+            "Tylko Soplówka Jeżowata - 500g",
+            "Tylko Soplówka Jeżowata - 1 kg",
+            "🔄 Subskrypcja: Świeży MIX co tydzień (4x 500g / miesiąc)",
+            "👨‍🍳 Gastronomia: Pakiet Testowy B2B (Darmowa próbka)",
+            "🏢 Gastronomia: Zamówienie Hurtowe (powyżej 3 kg)"
         ])
     
-    uwagi = st.text_area("Uwagi do zamówienia (opcjonalnie)")
+    uwagi = st.text_area("Uwagi do zamówienia (np. preferowany dzień odbioru)")
     
-    # Przycisk wysyłki
     submit_button = st.form_submit_button("Potwierdź rezerwację (bez płatności)")
 
     if submit_button:
         if imie and telefon:
-            # 1. Zapis do panelu
             st.session_state.zamowienia.append({
                 "Data": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
                 "Klient": imie, 
                 "Telefon": telefon, 
                 "Produkt": produkt,
-                "Typ": klient_typ
+                "Typ": klient_typ,
+                "Uwagi": uwagi
             })
             
-            # 2. Próba wysyłki Maila
             try:
                 if "EMAIL_SENDER" in st.secrets:
                     nadawca_email = st.secrets["EMAIL_SENDER"]
@@ -171,9 +171,8 @@ with st.form("preorder_form", clear_on_submit=True):
                     server.send_message(msg)
                     server.quit()
             except Exception:
-                pass # Cicha porażka maila, żeby klient nie widział błędów, system i tak zapisuje w Panelu.
+                pass 
             
-            # 3. Efekt Premium dla klienta (Toast + Balony)
             st.toast(f"Sukces! Rezerwacja na {produkt} została zapisana.", icon="🥂")
             st.balloons()
             
