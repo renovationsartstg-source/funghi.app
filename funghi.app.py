@@ -6,120 +6,142 @@ import pandas as pd
 import datetime
 
 # --- 1. KONFIGURACJA STRONY ---
-st.set_page_config(page_title="Fungi Atelier | Grzyby Premium", page_icon="🍄", layout="centered")
+st.set_page_config(
+    page_title="Fungi Atelier | Grzyby Premium", 
+    page_icon="🍄", 
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
 
-# --- 2. STYLIZACJA PREMIUM (CSS) ---
+# --- 2. AGRESYWNY CSS (Premium Look & Ukrycie UI Streamlita) ---
 st.markdown("""
 <style>
-    /* Ukrycie technicznego menu Streamlit */
+    /* Całkowite ukrycie elementów technicznych Streamlit */
     #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
     header {visibility: hidden;}
+    footer {visibility: hidden;}
+    [data-testid="collapsedControl"] {display: none;} /* Ukrywa strzałkę paska bocznego! */
     
-    /* Zmiana wyglądu głównego przycisku formularza */
+    /* Tło i typografia */
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+    }
+    
+    /* Przycisk Premium (Złoto i czerń) */
     div.stButton > button:first-child {
-        background-color: #2E402B; /* Głęboka, butelkowa zieleń */
-        color: #F5F5F5;
-        border: 1px solid #2E402B;
-        border-radius: 5px;
-        padding: 10px 24px;
-        font-weight: bold;
+        background-color: #121212; 
+        color: #D4AF37;
+        border: 1px solid #D4AF37;
+        border-radius: 4px;
+        padding: 12px 24px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
         width: 100%;
         transition: all 0.3s ease-in-out;
     }
     div.stButton > button:first-child:hover {
-        background-color: #1A2618;
-        border: 1px solid #D4AF37; /* Złoty akcent */
-        color: #D4AF37;
+        background-color: #D4AF37;
+        color: #121212;
+        border: 1px solid #121212;
+        box-shadow: 0px 4px 15px rgba(212, 175, 55, 0.3);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Inicjalizacja bazy zamówień dla sesji
+# --- 3. INICJALIZACJA BAZY DANYCH (W PAMIĘCI) ---
 if 'zamowienia' not in st.session_state:
     st.session_state.zamowienia = []
 
-# --- 3. UKRYTY PANEL ADMINISTRATORA ---
-st.sidebar.markdown("🔒 **Strefa Fungi Atelier**")
-haslo_admin = st.sidebar.text_input("Hasło dostępu", type="password")
-
-if haslo_admin == "Farma2026":
-    st.title("🛠️ Panel Zarządzania")
-    st.write("Witaj w panelu sterowania Fungi Atelier. Poniżej znajduje się lista rezerwacji.")
+# --- 4. "PANEL DUCH" (Tylko dla Szefa) ---
+# Sprawdza, czy w adresie URL dopisano tajny parametr: ?admin=Farma2026
+if st.query_params.get("admin") == "Farma2026":
+    st.title("🛠️ Fungi Atelier - Centrum Dowodzenia")
+    st.success("Zalogowano pomyślnie jako Administrator.")
+    
     if len(st.session_state.zamowienia) > 0:
         df = pd.DataFrame(st.session_state.zamowienia)
         st.dataframe(df, use_container_width=True)
         csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Pobierz do Excela (CSV)", data=csv, file_name="zamowienia_grzyby.csv", mime="text/csv")
+        st.download_button("📥 Pobierz listę rezerwacji (CSV)", data=csv, file_name="zamowienia_grzyby.csv", mime="text/csv")
     else:
         st.info("Brak nowych zamówień w tej sesji.")
-    st.stop()
+    st.stop() # Zatrzymuje ładowanie reszty strony (klient tego nie zobaczy)
 
 
-# --- 4. STRONA GŁÓWNA DLA KLIENTÓW ---
+# --- 5. STRONA GŁÓWNA (DLA KLIENTA) ---
 
-# Pasek FOMO
-st.error("🔥 **Ostatnie sztuki!** Na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki Jeżowatej**.")
+# Powiadomienie o niskim stanie magazynowym
+st.error("🔥 **Ostatnie sztuki!** Ze względu na rzemieślniczy proces, na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki**.")
 
-# --- NOWY GŁÓWNY BANNER HERO (ZINTEGROWANY) ---
-# Uwaga: Plik image_hero.png musi znajdować się w tym samym folderze co app.py na GitHubie.
-st.image("image_hero.png", use_column_width=True, caption="Fungi Atelier: Rzemieślnicza Precyzja")
+# Hero Image (Lokalny plik - upewnij się, że jest na GitHubie!)
+try:
+    st.image("image_hero.png", use_column_width=True)
+except:
+    st.info("Tu pojawi się Twoje główne zdjęcie Premium (image_hero.png)")
 
-# Nagłówek i podtytuł
-st.markdown("<h1 style='text-align: center; font-family: serif;'>Fungi Atelier</h1>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center; color: gray; font-weight: normal;'>Rzemieślnicza uprawa grzybów egzotycznych</h4>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Ścinane na zamówienie. Dostarczane tego samego dnia w Starogardzie Gdańskim.</p>", unsafe_allow_html=True)
+# Branding
+st.markdown("<h1 style='text-align: center; font-family: serif; margin-bottom: 0;'>Fungi Atelier</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: #a3a3a3; font-weight: 400; margin-top: 5px;'>Ekskluzywna uprawa grzybów egzotycznych</h4>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 14px;'>Ścinane pod konkretne zamówienie. Gwarancja pełnego łańcucha chłodniczego z dostawą w Starogardzie.</p>", unsafe_allow_html=True)
 
 st.divider()
 
-# Zakładki ofertowe
-tab1, tab2 = st.tabs(["🌿 Nasze Zbiory", "🧠 Dlaczego my?"])
+# Sekcja Produktów (Zakładki)
+tab1, tab2 = st.tabs(["🌿 Oferta (Pre-order)", "🧠 Nasza Filozofia"])
 
 with tab1:
     col1, col2 = st.columns(2)
     with col1:
-        # --- ZDEDYKOWANE ZDJĘCIE SHIITAKE ---
-        st.image("image_shiitake.png", caption="Shiitake (Twardnik Japoński) - Jakość Premium")
-        st.markdown("**Cena:** 40 zł / 1 kg")
-        st.write("Mięsisty kapelusz, potężna dawka umami. Niezastąpiony do ramenu, woka lub na palone masło.")
+        try:
+            st.image("image_shiitake.png")
+        except:
+            st.info("Zdjęcie Shiitake (image_shiitake.png)")
+        st.markdown("**🪵 Shiitake Premium**")
+        st.markdown("*Cena: 40 zł / 1 kg*")
+        st.caption("Mięsisty, jędrny kapelusz. Tłocznia umami dla Twoich dań.")
     with col2:
-        # --- ZDEDYKOWANE ZDJĘCIE SOPLÓWKI ---
-        st.image("image_lions_mane.png", caption="Soplówka (Lion's Mane) - Rarytas")
-        st.markdown("**Cena:** 60 zł / 1 kg")
-        st.write("Kulinarny rarytas przypominający w strukturze mięso kraba. Smażona jak stek rozpływa się w ustach.")
+        try:
+            st.image("image_lions_mane.png")
+        except:
+            st.info("Zdjęcie Soplówki (image_lions_mane.png)")
+        st.markdown("**☁️ Soplówka Jeżowata**")
+        st.markdown("*Cena: 60 zł / 1 kg*")
+        st.caption("Kulinarny rarytas. Struktura przypominająca mięso homara.")
 
 with tab2:
-    st.write("Przemysłowe grzyby często podróżują setki kilometrów zamknięte w duszącym plastiku, przez co tracą teksturę, aromat i 'pocą się'.")
-    st.write("My uprawiamy je lokalnie, w rygorystycznie kontrolowanym mikroklimacie i **ścinamy dopiero, gdy złożysz zamówienie**. Otrzymujesz produkt najwyższej jakości restauracyjnej, pachnący czystym lasem, zachowując pełen łańcuch chłodniczy.")
+    st.markdown("### Koniec z zaparzonymi grzybami z marketu.")
+    st.write("Większość grzybów w dystrybucji przemysłowej traci 50% swoich walorów przez złą temperaturę i duszący plastik. My uprawiamy je w zautomatyzowanym mikroklimacie i **ścinamy dopiero, gdy klikniesz przycisk**. Dostajesz produkt w stanie idealnym, pachnący lasem.")
 
 st.divider()
 
-# --- 5. FORMULARZ ZAMÓWIEŃ ---
-st.markdown("### 📦 Złóż rezerwację (bez zobowiązań)")
-st.write("Wypełnij poniższy formularz. Odezwiemy się do Ciebie z informacją o dokładnym terminie zbioru i dostawy.")
+# --- 6. ELEGANCKI FORMULARZ ---
+st.markdown("### 📦 Rezerwacja na najbliższy zbiór")
 
-with st.form("preorder_form"):
+with st.form("preorder_form", clear_on_submit=True):
     col_a, col_b = st.columns(2)
     with col_a:
         imie = st.text_input("Imię i Nazwisko / Nazwa Lokalu *")
-        klient_typ = st.selectbox("Typ klienta", ["Osoba prywatna", "Restauracja / B2B"])
-    with col_b:
         telefon = st.text_input("Numer telefonu *")
-        produkt = st.selectbox("Wybierz zestaw", [
-            "Zestaw MIX (Shiitake + Soplówka) - 500g",
+    with col_b:
+        klient_typ = st.selectbox("Typ klienta", ["Osoba prywatna", "Restauracja / Szef Kuchni"])
+        produkt = st.selectbox("Wybierz wsad", [
+            "Zestaw MIX Degustacyjny (Shiitake + Soplówka) - 500g",
             "Tylko Shiitake - 1 kg",
             "Tylko Shiitake - 500g",
             "Tylko Soplówka - 500g",
-            "Hurt Gastronomia (kontakt telefoniczny)"
+            "Współpraca Hurtowa (Kontakt B2B)"
         ])
     
-    uwagi = st.text_area("Dodatkowe uwagi (np. preferowane godziny odbioru)")
+    uwagi = st.text_area("Uwagi do zamówienia (opcjonalnie)")
     
-    submit_button = st.form_submit_button("ZAREZERWUJ ŚWIEŻE GRZYBY")
+    # Przycisk wysyłki
+    submit_button = st.form_submit_button("Potwierdź rezerwację (bez płatności)")
 
     if submit_button:
         if imie and telefon:
-            # Zapis do ukrytego panelu administratora
+            # 1. Zapis do panelu
             st.session_state.zamowienia.append({
                 "Data": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), 
                 "Klient": imie, 
@@ -128,7 +150,7 @@ with st.form("preorder_form"):
                 "Typ": klient_typ
             })
             
-            # Próba wysłania powiadomienia e-mail (jeśli skonfigurowano st.secrets)
+            # 2. Próba wysyłki Maila
             try:
                 if "EMAIL_SENDER" in st.secrets:
                     nadawca_email = st.secrets["EMAIL_SENDER"]
@@ -138,9 +160,9 @@ with st.form("preorder_form"):
                     msg = MIMEMultipart()
                     msg['From'] = nadawca_email
                     msg['To'] = odbiorca_email
-                    msg['Subject'] = f"🍄 NOWE ZAMÓWIENIE: {imie} ({produkt})"
+                    msg['Subject'] = f"🍄 ZAMÓWIENIE: {imie} ({produkt})"
 
-                    tresc = f"Nowe zamówienie z Fungi Atelier!\n\nData: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}\nTyp: {klient_typ}\nKlient: {imie}\nTelefon: {telefon}\nProdukt: {produkt}\nUwagi: {uwagi if uwagi else 'Brak'}"
+                    tresc = f"Nowa rezerwacja z Fungi Atelier!\n\nData: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}\nTyp: {klient_typ}\nKlient: {imie}\nTelefon: {telefon}\nProdukt: {produkt}\nUwagi: {uwagi if uwagi else 'Brak'}"
                     msg.attach(MIMEText(tresc, 'plain'))
 
                     server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -148,15 +170,15 @@ with st.form("preorder_form"):
                     server.login(nadawca_email, haslo_email)
                     server.send_message(msg)
                     server.quit()
-
-                st.success(f"Dziękujemy, {imie}! Rezerwacja przyjęta. Oddzwonimy na numer {telefon}.")
-                st.balloons()
-            except Exception as e:
-                # Jeśli e-mail nie wyjdzie (bo brak konfiguracji w chmurze), klient i tak widzi sukces, a zamówienie wpada do panelu Admina.
-                st.success(f"Dziękujemy, {imie}! Rezerwacja zapisana w systemie. Oddzwonimy!")
-                st.balloons()
+            except Exception:
+                pass # Cicha porażka maila, żeby klient nie widział błędów, system i tak zapisuje w Panelu.
+            
+            # 3. Efekt Premium dla klienta (Toast + Balony)
+            st.toast(f"Sukces! Rezerwacja na {produkt} została zapisana.", icon="🥂")
+            st.balloons()
+            
         else:
-            st.error("Proszę wypełnić pola oznaczone gwiazdką (Imię i Telefon).")
+            st.error("Wypełnij wymagane pola: Imię oraz Telefon.")
 
-# --- 6. STOPKA KONTAKTOWA ---
-st.markdown("<br><p style='text-align: center; color: gray; font-size: 13px;'>✉️ fungi.atelier@proton.me | 📞 +48 513-783-403</p>", unsafe_allow_html=True)
+# Stopka
+st.markdown("<br><p style='text-align: center; color: #555; font-size: 12px;'>Fungi Atelier © 2026 | fungi.atelier@proton.me | +48 513-783-403</p>", unsafe_allow_html=True)
