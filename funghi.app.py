@@ -58,9 +58,16 @@ st.markdown("""
 if 'zamowienia' not in st.session_state:
     st.session_state.zamowienia = []
 
-# Zmienna pilnująca, czy jesteś zalogowany
 if 'is_admin' not in st.session_state:
     st.session_state.is_admin = False
+
+# Dynamiczny pasek ogłoszeń (FOMO) w pamięci sesji
+if 'fomo_text' not in st.session_state:
+    st.session_state.fomo_text = "🔥 **Ostatnie sztuki!** Ze względu na rzemieślniczy proces, na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki**."
+
+if 'show_fomo' not in st.session_state:
+    st.session_state.show_fomo = True
+
 
 # --- 4. BEZPIECZNY PANEL ADMINISTRATORA (WIDOK PO ZALOGOWANIU) ---
 if st.session_state.is_admin:
@@ -73,6 +80,20 @@ if st.session_state.is_admin:
         st.rerun()
         
     st.divider()
+    
+    # --- NOWOŚĆ: Edycja paska ogłoszeń ---
+    st.subheader("📢 Zarządzanie ogłoszeniami (Pasek na górze strony)")
+    nowy_tekst_fomo = st.text_area("Treść ogłoszenia (możesz używać gwiazdek **tekst** do pogrubienia):", value=st.session_state.fomo_text)
+    pokaz_fomo = st.checkbox("Wyświetlaj pasek ogłoszeń klientom", value=st.session_state.show_fomo)
+    
+    if st.button("💾 Zapisz zmiany na stronie"):
+        st.session_state.fomo_text = nowy_tekst_fomo
+        st.session_state.show_fomo = pokaz_fomo
+        st.success("Strona główna zaktualizowana!")
+        
+    st.divider()
+    
+    # --- Baza zamówień ---
     st.subheader("📦 Baza Zamówień")
     
     if len(st.session_state.zamowienia) > 0:
@@ -89,7 +110,9 @@ if st.session_state.is_admin:
 # --- 5. STRONA GŁÓWNA DLA KLIENTA (WIDOK PRZED ZALOGOWANIEM) ---
 # =====================================================================
 
-st.error("🔥 **Ostatnie sztuki!** Ze względu na rzemieślniczy proces, na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki**.")
+# Wyświetlanie dynamicznego paska FOMO, jeśli jest włączony w panelu Admina
+if st.session_state.show_fomo and st.session_state.fomo_text.strip() != "":
+    st.error(st.session_state.fomo_text)
 
 try:
     st.image("image_hero.png", use_column_width=True)
@@ -196,11 +219,9 @@ st.divider()
 # --- 6. UKRYTA SEKCJA LOGOWANIA W STOPCE ---
 st.markdown("<p style='text-align: center; color: #555; font-size: 12px;'>Fungi Atelier © 2026 | fungi.atelier@proton.me | +48 513-783-403</p>", unsafe_allow_html=True)
 
-# Dyskretna kłódka na samym dole strony
 with st.expander("🔒"):
     haslo_wejsciowe = st.text_input("Zarządzanie", type="password", help="Wpisz hasło administratora")
     if haslo_wejsciowe == "Farma2026":
-        # Ustawiamy zmienną w sesji jako Zalogowany i odświeżamy stronę
         st.session_state.is_admin = True
         st.rerun()
     elif haslo_wejsciowe != "":
