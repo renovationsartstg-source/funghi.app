@@ -20,9 +20,8 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
-    [data-testid="collapsedControl"] {display: none;} /* Ukrywa strzałkę paska bocznego! */
+    [data-testid="collapsedControl"] {display: none;}
     
-    /* Tło i typografia */
     .block-container {
         padding-top: 1rem;
         padding-bottom: 2rem;
@@ -50,7 +49,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. INICJALIZACJA BAZY DANYCH (W PAMIĘCI) ---
+# --- 3. INICJALIZACJA BAZY DANYCH ---
 if 'zamowienia' not in st.session_state:
     st.session_state.zamowienia = []
 
@@ -69,8 +68,6 @@ if st.query_params.get("admin") == "Farma2026":
     st.stop() 
 
 # --- 5. STRONA GŁÓWNA (DLA KLIENTA) ---
-
-# Powiadomienie o niskim stanie magazynowym
 st.error("🔥 **Ostatnie sztuki!** Ze względu na rzemieślniczy proces, na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki**.")
 
 try:
@@ -78,14 +75,12 @@ try:
 except:
     st.info("Tu pojawi się Twoje główne zdjęcie Premium (image_hero.png)")
 
-# Branding
 st.markdown("<h1 style='text-align: center; font-family: serif; margin-bottom: 0;'>Fungi Atelier</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center; color: #a3a3a3; font-weight: 400; margin-top: 5px;'>Ekskluzywna uprawa grzybów egzotycznych</h4>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size: 14px;'>Ścinane pod konkretne zamówienie. Gwarancja pełnego łańcucha chłodniczego z dostawą w Starogardzie.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 14px;'>Ścinane na zamówienie. Gwarancja pełnego łańcucha chłodniczego z dostawą w Starogardzie.</p>", unsafe_allow_html=True)
 
 st.divider()
 
-# Sekcja Produktów
 tab1, tab2 = st.tabs(["🌿 Oferta (Pre-order)", "🧠 Nasza Filozofia"])
 
 with tab1:
@@ -96,7 +91,7 @@ with tab1:
         except:
             st.info("Zdjęcie Shiitake (image_shiitake.png)")
         st.markdown("**🪵 Shiitake Premium**")
-        st.markdown("*Cena: 40 zł / 1 kg*")
+        st.markdown("*Cena: 40 zł / 1 kg (Świeże)*")
         st.caption("Mięsisty, jędrny kapelusz. Tłocznia umami dla Twoich dań.")
     with col2:
         try:
@@ -104,12 +99,14 @@ with tab1:
         except:
             st.info("Zdjęcie Soplówki (image_lions_mane.png)")
         st.markdown("**☁️ Soplówka Jeżowata**")
-        st.markdown("*Cena: 60 zł / 1 kg*")
+        st.markdown("*Cena: 60 zł / 1 kg (Świeże)*")
         st.caption("Kulinarny rarytas. Struktura przypominająca mięso homara.")
 
 with tab2:
     st.markdown("### Koniec z zaparzonymi grzybami z marketu.")
-    st.write("Większość grzybów w dystrybucji przemysłowej traci 50% swoich walorów przez złą temperaturę i duszący plastik. My uprawiamy je w zautomatyzowanym mikroklimacie i **ścinamy dopiero, gdy klikniesz przycisk**. Dostajesz produkt w stanie idealnym, pachnący lasem.")
+    st.write("Większość grzybów w dystrybucji przemysłowej traci 50% swoich walorów przez złą temperaturę i duszący plastik. My uprawiamy je w zautomatyzowanym mikroklimacie i **ścinamy dopiero, gdy klikniesz przycisk**.")
+    st.markdown("### 🍂 Esencja Smaku (Nasze Susze)")
+    st.write("Część naszych najpiękniejszych zbiorów powoli suszymy w niskich temperaturach. Dzięki temu pozbywamy się wody, zamykając 100% aromatu i właściwości prozdrowotnych (nootropowych) w wygodnej formie, idealnej do wywarów, sosów i ramenu.")
 
 st.divider()
 
@@ -123,20 +120,21 @@ with st.form("preorder_form", clear_on_submit=True):
         telefon = st.text_input("Numer telefonu *")
         klient_typ = st.selectbox("Typ klienta", ["Osoba prywatna", "Restauracja / Szef Kuchni"])
     with col_b:
-        # --- ROZBUDOWANA LISTA WSADÓW ---
-        produkt = st.selectbox("Wybierz wsad (Produkt)", [
-            "Zestaw MIX Degustacyjny (Shiitake + Soplówka) - 500g",
-            "Zestaw MIX Kulinarny (Shiitake + Soplówka) - 1 kg",
-            "Tylko Shiitake Premium - 500g",
-            "Tylko Shiitake Premium - 1 kg",
-            "Tylko Soplówka Jeżowata - 500g",
-            "Tylko Soplówka Jeżowata - 1 kg",
-            "🔄 Subskrypcja: Świeży MIX co tydzień (4x 500g / miesiąc)",
-            "👨‍🍳 Gastronomia: Pakiet Testowy B2B (Darmowa próbka)",
-            "🏢 Gastronomia: Zamówienie Hurtowe (powyżej 3 kg)"
+        # --- Uporządkowana i rozbudowana lista produktów ---
+        produkt = st.selectbox("Wybierz produkt", [
+            "🌿 ŚWIEŻE: Zestaw MIX Degustacyjny (Shiitake + Soplówka) - 500g",
+            "🌿 ŚWIEŻE: Zestaw MIX Kulinarny - 1 kg",
+            "🌿 ŚWIEŻE: Tylko Shiitake Premium - 500g",
+            "🌿 ŚWIEŻE: Tylko Soplówka Jeżowata - 500g",
+            "🍂 SUSZONE: Shiitake (Intensywne Umami) - 50g",
+            "🍂 SUSZONE: Soplówka Jeżowata (Ekstrakt Nootropowy) - 50g",
+            "🍂 SUSZONE: Zestaw MIX Suszony - 100g",
+            "🔄 SUBSKRYPCJA: Świeży MIX co tydzień (4x 500g / miesiąc)",
+            "👨‍🍳 GASTRONOMIA: Pakiet Testowy B2B (Darmowa próbka)",
+            "🏢 GASTRONOMIA: Zamówienie Hurtowe (powyżej 3 kg)"
         ])
     
-    uwagi = st.text_area("Uwagi do zamówienia (np. preferowany dzień odbioru)")
+    uwagi = st.text_area("Uwagi do zamówienia (np. preferowany dzień odbioru / dane do wysyłki Paczkomatem)")
     
     submit_button = st.form_submit_button("Potwierdź rezerwację (bez płatności)")
 
