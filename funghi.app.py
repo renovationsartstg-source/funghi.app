@@ -13,21 +13,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 2. AGRESYWNY CSS (Premium Look & Ukrycie UI Streamlita) ---
+# --- 2. AGRESYWNY CSS ---
 st.markdown("""
 <style>
-    /* Całkowite ukrycie elementów technicznych Streamlit */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
-    [data-testid="collapsedControl"] {display: none;}
+    [data-testid="collapsedControl"] {display: none;} 
     
     .block-container {
         padding-top: 1rem;
         padding-bottom: 2rem;
     }
     
-    /* Przycisk Premium (Złoto i czerń) */
     div.stButton > button:first-child {
         background-color: #121212; 
         color: #D4AF37;
@@ -46,17 +44,36 @@ st.markdown("""
         border: 1px solid #121212;
         box-shadow: 0px 4px 15px rgba(212, 175, 55, 0.3);
     }
+    
+    /* Ukrycie tła dla rozwijanego panelu logowania, żeby był dyskretny */
+    .streamlit-expanderHeader {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. INICJALIZACJA BAZY DANYCH ---
+# --- 3. INICJALIZACJA SESJI I BAZY DANYCH ---
 if 'zamowienia' not in st.session_state:
     st.session_state.zamowienia = []
 
-# --- 4. "PANEL DUCH" (Tylko dla Szefa: /?admin=Farma2026) ---
-if st.query_params.get("admin") == "Farma2026":
+# Zmienna pilnująca, czy jesteś zalogowany
+if 'is_admin' not in st.session_state:
+    st.session_state.is_admin = False
+
+# --- 4. BEZPIECZNY PANEL ADMINISTRATORA (WIDOK PO ZALOGOWANIU) ---
+if st.session_state.is_admin:
     st.title("🛠️ Fungi Atelier - Centrum Dowodzenia")
-    st.success("Zalogowano pomyślnie jako Administrator.")
+    st.success("Zabezpieczona sesja. Zalogowano pomyślnie.")
+    
+    # Przycisk wylogowania
+    if st.button("🚪 Wyloguj i wróć do sklepu"):
+        st.session_state.is_admin = False
+        st.rerun()
+        
+    st.divider()
+    st.subheader("📦 Baza Zamówień")
     
     if len(st.session_state.zamowienia) > 0:
         df = pd.DataFrame(st.session_state.zamowienia)
@@ -64,16 +81,20 @@ if st.query_params.get("admin") == "Farma2026":
         csv = df.to_csv(index=False).encode('utf-8')
         st.download_button("📥 Pobierz listę rezerwacji (CSV)", data=csv, file_name="zamowienia_grzyby.csv", mime="text/csv")
     else:
-        st.info("Brak nowych zamówień w tej sesji.")
-    st.stop() 
+        st.info("Brak nowych zamówień. Klienci jeszcze śpią.")
+        
+    st.stop() # Zatrzymuje kod, żeby zalogowany admin nie widział na dole strony dla klientów
 
-# --- 5. STRONA GŁÓWNA (DLA KLIENTA) ---
+# =====================================================================
+# --- 5. STRONA GŁÓWNA DLA KLIENTA (WIDOK PRZED ZALOGOWANIEM) ---
+# =====================================================================
+
 st.error("🔥 **Ostatnie sztuki!** Ze względu na rzemieślniczy proces, na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki**.")
 
 try:
     st.image("image_hero.png", use_column_width=True)
 except:
-    st.info("Tu pojawi się Twoje główne zdjęcie Premium (image_hero.png)")
+    pass
 
 st.markdown("<h1 style='text-align: center; font-family: serif; margin-bottom: 0;'>Fungi Atelier</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center; color: #a3a3a3; font-weight: 400; margin-top: 5px;'>Ekskluzywna uprawa grzybów egzotycznych</h4>", unsafe_allow_html=True)
@@ -86,18 +107,14 @@ tab1, tab2 = st.tabs(["🌿 Oferta (Pre-order)", "🧠 Nasza Filozofia"])
 with tab1:
     col1, col2 = st.columns(2)
     with col1:
-        try:
-            st.image("image_shiitake.png")
-        except:
-            st.info("Zdjęcie Shiitake (image_shiitake.png)")
+        try: st.image("image_shiitake.png")
+        except: pass
         st.markdown("**🪵 Shiitake Premium**")
         st.markdown("*Cena: 40 zł / 1 kg (Świeże)*")
         st.caption("Mięsisty, jędrny kapelusz. Tłocznia umami dla Twoich dań.")
     with col2:
-        try:
-            st.image("image_lions_mane.png")
-        except:
-            st.info("Zdjęcie Soplówki (image_lions_mane.png)")
+        try: st.image("image_lions_mane.png")
+        except: pass
         st.markdown("**☁️ Soplówka Jeżowata**")
         st.markdown("*Cena: 60 zł / 1 kg (Świeże)*")
         st.caption("Kulinarny rarytas. Struktura przypominająca mięso homara.")
@@ -106,11 +123,10 @@ with tab2:
     st.markdown("### Koniec z zaparzonymi grzybami z marketu.")
     st.write("Większość grzybów w dystrybucji przemysłowej traci 50% swoich walorów przez złą temperaturę i duszący plastik. My uprawiamy je w zautomatyzowanym mikroklimacie i **ścinamy dopiero, gdy klikniesz przycisk**.")
     st.markdown("### 🍂 Esencja Smaku (Nasze Susze)")
-    st.write("Część naszych najpiękniejszych zbiorów powoli suszymy w niskich temperaturach. Dzięki temu pozbywamy się wody, zamykając 100% aromatu i właściwości prozdrowotnych (nootropowych) w wygodnej formie, idealnej do wywarów, sosów i ramenu.")
+    st.write("Część naszych najpiękniejszych zbiorów powoli suszymy w niskich temperaturach. Dzięki temu pozbywamy się wody, zamykając 100% aromatu i właściwości prozdrowotnych w wygodnej formie, idealnej do wywarów, sosów i ramenu.")
 
 st.divider()
 
-# --- 6. ELEGANCKI FORMULARZ ---
 st.markdown("### 📦 Rezerwacja na najbliższy zbiór")
 
 with st.form("preorder_form", clear_on_submit=True):
@@ -120,7 +136,6 @@ with st.form("preorder_form", clear_on_submit=True):
         telefon = st.text_input("Numer telefonu *")
         klient_typ = st.selectbox("Typ klienta", ["Osoba prywatna", "Restauracja / Szef Kuchni"])
     with col_b:
-        # --- Uporządkowana i rozbudowana lista produktów ---
         produkt = st.selectbox("Wybierz produkt", [
             "🌿 ŚWIEŻE: Zestaw MIX Degustacyjny (Shiitake + Soplówka) - 500g",
             "🌿 ŚWIEŻE: Zestaw MIX Kulinarny - 1 kg",
@@ -173,9 +188,20 @@ with st.form("preorder_form", clear_on_submit=True):
             
             st.toast(f"Sukces! Rezerwacja na {produkt} została zapisana.", icon="🥂")
             st.balloons()
-            
         else:
             st.error("Wypełnij wymagane pola: Imię oraz Telefon.")
 
-# Stopka
-st.markdown("<br><p style='text-align: center; color: #555; font-size: 12px;'>Fungi Atelier © 2026 | fungi.atelier@proton.me | +48 513-783-403</p>", unsafe_allow_html=True)
+st.divider()
+
+# --- 6. UKRYTA SEKCJA LOGOWANIA W STOPCE ---
+st.markdown("<p style='text-align: center; color: #555; font-size: 12px;'>Fungi Atelier © 2026 | fungi.atelier@proton.me | +48 513-783-403</p>", unsafe_allow_html=True)
+
+# Dyskretna kłódka na samym dole strony
+with st.expander("🔒"):
+    haslo_wejsciowe = st.text_input("Zarządzanie", type="password", help="Wpisz hasło administratora")
+    if haslo_wejsciowe == "Farma2026":
+        # Ustawiamy zmienną w sesji jako Zalogowany i odświeżamy stronę
+        st.session_state.is_admin = True
+        st.rerun()
+    elif haslo_wejsciowe != "":
+        st.error("Błędne hasło.")
