@@ -45,7 +45,7 @@ haslo_admin = st.sidebar.text_input("Hasło dostępu", type="password")
 
 if haslo_admin == "Farma2026":
     st.title("🛠️ Panel Zarządzania")
-    st.write("Witaj w panelu sterowania. Poniżej znajduje się lista rezerwacji.")
+    st.write("Witaj w panelu sterowania Fungi Atelier. Poniżej znajduje się lista rezerwacji.")
     if len(st.session_state.zamowienia) > 0:
         df = pd.DataFrame(st.session_state.zamowienia)
         st.dataframe(df, use_container_width=True)
@@ -61,8 +61,9 @@ if haslo_admin == "Farma2026":
 # Pasek FOMO
 st.error("🔥 **Ostatnie sztuki!** Na najbliższy zbiór zostało nam tylko **1.5 kg Soplówki Jeżowatej**.")
 
-# Hero Image (Klimatyczne, ciemne zdjęcie rzemieślniczych grzybów)
-st.image("https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1200&auto=format&fit=crop", use_column_width=True)
+# --- NOWY GŁÓWNY BANNER HERO (ZINTEGROWANY) ---
+# Uwaga: Plik image_hero.png musi znajdować się w tym samym folderze co app.py na GitHubie.
+st.image("image_hero.png", use_column_width=True, caption="Fungi Atelier: Rzemieślnicza Precyzja")
 
 # Nagłówek i podtytuł
 st.markdown("<h1 style='text-align: center; font-family: serif;'>Fungi Atelier</h1>", unsafe_allow_html=True)
@@ -77,11 +78,13 @@ tab1, tab2 = st.tabs(["🌿 Nasze Zbiory", "🧠 Dlaczego my?"])
 with tab1:
     col1, col2 = st.columns(2)
     with col1:
-        st.image("https://images.unsplash.com/photo-1587314168485-3236d6710814?q=80&w=600&auto=format&fit=crop", caption="Shiitake (Twardnik Japoński)")
+        # --- ZDEDYKOWANE ZDJĘCIE SHIITAKE ---
+        st.image("image_shiitake.png", caption="Shiitake (Twardnik Japoński) - Jakość Premium")
         st.markdown("**Cena:** 40 zł / 1 kg")
         st.write("Mięsisty kapelusz, potężna dawka umami. Niezastąpiony do ramenu, woka lub na palone masło.")
     with col2:
-        st.image("https://images.unsplash.com/photo-1605807646983-377bc5a76445?q=80&w=600&auto=format&fit=crop", caption="Soplówka (Lion's Mane)")
+        # --- ZDEDYKOWANE ZDJĘCIE SOPLÓWKI ---
+        st.image("image_lions_mane.png", caption="Soplówka (Lion's Mane) - Rarytas")
         st.markdown("**Cena:** 60 zł / 1 kg")
         st.write("Kulinarny rarytas przypominający w strukturze mięso kraba. Smażona jak stek rozpływa się w ustach.")
 
@@ -93,7 +96,7 @@ st.divider()
 
 # --- 5. FORMULARZ ZAMÓWIEŃ ---
 st.markdown("### 📦 Złóż rezerwację (bez zobowiązań)")
-st.write("Wypełnij poniższy formularz. Odezwiemy się do Ciebie z informacją o dokładnym terminie zbioru i dostawy (zazwyczaj czwartek/piątek).")
+st.write("Wypełnij poniższy formularz. Odezwiemy się do Ciebie z informacją o dokładnym terminie zbioru i dostawy.")
 
 with st.form("preorder_form"):
     col_a, col_b = st.columns(2)
@@ -107,7 +110,7 @@ with st.form("preorder_form"):
             "Tylko Shiitake - 1 kg",
             "Tylko Shiitake - 500g",
             "Tylko Soplówka - 500g",
-            "Hurt Gastronomia (ustalimy telefonicznie)"
+            "Hurt Gastronomia (kontakt telefoniczny)"
         ])
     
     uwagi = st.text_area("Dodatkowe uwagi (np. preferowane godziny odbioru)")
@@ -146,7 +149,7 @@ with st.form("preorder_form"):
                     server.send_message(msg)
                     server.quit()
 
-                st.success(f"Dziękujemy, {imie}! Rezerwacja przyjęta. Oczekuj na kontakt z naszej strony pod numerem {telefon}.")
+                st.success(f"Dziękujemy, {imie}! Rezerwacja przyjęta. Oddzwonimy na numer {telefon}.")
                 st.balloons()
             except Exception as e:
                 # Jeśli e-mail nie wyjdzie (bo brak konfiguracji w chmurze), klient i tak widzi sukces, a zamówienie wpada do panelu Admina.
